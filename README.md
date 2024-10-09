@@ -2,7 +2,9 @@ A very basic password manager written purely in python. For first time entry a m
 
 __*Please do not forget logging in after you've signed in.*__
 
-After signing in the user can save a new password with a password identifier (of which they should not forget) and the password itself. After saving the password the user can go back and demand an already saved password or log out. _Currently there is no way to retrieve the user's password in the case of them forgetting their master password/master username or their specific password identifier._
+After signing in the user can save a new password with a password identifier (of which they should not forget) and the password itself. After saving the password the user can go back and demand an already saved password or log out. 
+
+_Currently there is no way to retrieve the user's password in the case of them forgetting their master password/master username or their specific password identifier._
 
 Master username, master password and password identifiers are hashed using sha256. User saved passwords are encrypted using AES symmetric encryption.  
 
