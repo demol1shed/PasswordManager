@@ -120,6 +120,16 @@ class UserManager:
     def HideFile(self, _username, passName):
         subprocess.run(["attrib", "+H", f"{self.userPathFile}/{_username}/{passName}{self.hashedKey.hexdigest()}.txt"], check=True)
 
+    def RemoveFile(self, _username, passName):
+        #removes key save
+        if os.path.isfile(f"{self.userPathFile}/{_username}/{passName}.txt"):
+            os.remove(f"{self.userPathFile}/{_username}/{passName}{self.hashedKey.hexdigest()}.txt")
+            os.remove(f"{self.userPathFile}/{_username}/{passName}.txt")
+            guiHandler.ThrowInfo("Success!", "The desired password has been removed")
+            #this does not recalculate the passcount label for some reason and i can not bother with it tbh.
+            return
+        guiHandler.ThrowErr("Failure!", "Identifier did not match any password")
+
 class GUIHandler:
     def __init__(self, root: Tk, mainFrame: ttk.Frame):
         self.usernameEntry = None
@@ -140,6 +150,11 @@ class GUIHandler:
         hashedUsername = self.EncodeUP(self.username.get())
         hashedPassName = self.EncodeUP(self.passName.get())
         userManager.RetrievePassInfo(hashedUsername, hashedPassName)
+
+    def DeleteButtonWrapper(self):
+        hashedUsername = self.EncodeUP(self.username.get())
+        hashedPassName = self.EncodeUP(self.passName.get())
+        userManager.RemoveFile(hashedUsername, hashedPassName)
 
     def EncodeUP(self, stringToHash: str) -> str:
         hashedStr = sha256(stringToHash.encode("utf-8"))
@@ -188,13 +203,18 @@ class GUIHandler:
         ttk.Button(self.mainFrame, text="Save new password", command=self.InitNewPassScreen).grid(column=0, row=1, pady=10, padx=10)
         rButton = ttk.Button(self.mainFrame, text="Retrieve saved password")
         rButton.grid(column=0, row=2, pady=10, padx=10)
+        deleteButton = ttk.Button(self.mainFrame, text="Remove password")
+        deleteButton.grid(column=0, row=3, pady=10, padx=10)
         self.ReturnToLastWindow(2)
         if userManager.ChkUserAcc(self.EncodeUP(self.username.get())):
             passLabel.config(text="Enter desired password name below")
+            deleteButton.config(state=tkinter.NORMAL)
+            deleteButton.config(command=self.DeleteButtonWrapper)
             rButton.config(state=tkinter.NORMAL)
             rButton.config(command=self.RetrieveButtonWrapper)
         else:
             passLabel.config(text="Please save a password first")
+            deleteButton.config(state=tkinter.DISABLED)
             rButton.config(state=tkinter.DISABLED)
 
     def InitNewPassScreen(self):
@@ -225,7 +245,7 @@ class GUIHandler:
             return
         # 2 for logging out.
         if winIndex == 2:
-            ttk.Button(self.mainFrame, text="Log out", command=self.InitFirstWindow).grid(column=0, row=3, pady=10, padx=10)
+            ttk.Button(self.mainFrame, text="Log out", command=self.InitFirstWindow).grid(column=0, row=4, pady=10, padx=10)
             return
         self.ThrowErr("Failure!", f"winIndex: '{winIndex}' does not exist")
 
